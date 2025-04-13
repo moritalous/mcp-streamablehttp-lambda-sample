@@ -1,112 +1,112 @@
 # Streamable MCP Lambda Function
 
 > [!WARNING]
-> Lambdaへデプロイし、MCPのTypeScriptライブラリーから呼び出せることは確認しました。しかし、プライベートプロパティへアクセスしているなど、トリッキーな実装となっています。また、期待した動作をしない場合があります。検証結果として残します。
+> While we have confirmed that this can be deployed to Lambda and called from the MCP TypeScript library, the implementation is tricky, including accessing private properties, and may not always work as expected. This remains as a proof of concept.
 
-このプロジェクトは、AWS Lambda上でModel Context Protocol (MCP)を使用したStreamable HTTP APIを実装したサーバーレスアプリケーションです。
+This project is a serverless application that implements a Streamable HTTP API using the Model Context Protocol (MCP) on AWS Lambda.
 
-## プロジェクト概要
+## Project Overview
 
-このアプリケーションは、AWS SAM (Serverless Application Model)を使用して、レスポンスストリーミングをサポートするLambda関数をデプロイします。主な機能は以下の通りです：
+This application deploys a Lambda function that supports response streaming using AWS SAM (Serverless Application Model). The main features include:
 
-- Model Context Protocol (MCP)を使用したツール呼び出し機能
-- Lambda Response Streaming機能を活用したリアルタイムレスポンス
-- 簡単なエコーツールと計算ツールの実装例
+- Tool invocation functionality using the Model Context Protocol (MCP)
+- Real-time responses utilizing Lambda Response Streaming
+- Implementation examples of simple echo and calculation tools
 
-## 使用ライブラリについて
+## About the Libraries Used
 
-このプロジェクトでは、Model Context Protocol (MCP) TypeScriptライブラリの未リリースバージョン（mainブランチ）を使用しています。
+This project uses an unreleased version (main branch) of the Model Context Protocol (MCP) TypeScript library.
 
-- **リポジトリ**: [github.com/anthropics/model-context-protocol](https://github.com/anthropics/model-context-protocol)
-- **ブランチ**: main
-- **コミットハッシュ**: 56b042795729dcdbf12a2c7be47955fbeafc6bc5 (2025-04-13)
+- **Repository**: [github.com/anthropics/model-context-protocol](https://github.com/anthropics/model-context-protocol)
+- **Branch**: main
+- **Commit Hash**: 56b042795729dcdbf12a2c7be47955fbeafc6bc5 (2025-04-13)
 
 > [!NOTE]
-> 未リリースのバージョンを使用しているため、将来的なAPIの変更によって互換性が失われる可能性があります。
+> Since we are using an unreleased version, compatibility may be lost due to future API changes.
 
-## アーキテクチャ
+## Architecture
 
-このアプリケーションは以下のコンポーネントで構成されています：
+This application consists of the following components:
 
-- **MCPStreamableFunction**: Node.js 22.xランタイムを使用したLambda関数
-- **Lambda Adapter Layer**: レスポンスストリーミングをサポートするためのレイヤー
-- **Function URL**: 認証なしでLambda関数に直接アクセスするためのエンドポイント
+- **MCPStreamableFunction**: Lambda function using Node.js 22.x runtime
+- **Lambda Adapter Layer**: Layer to support response streaming
+- **Function URL**: Endpoint for direct access to the Lambda function without authentication
 
-## 前提条件
+## Prerequisites
 
-このプロジェクトを使用するには以下が必要です：
+To use this project, you need:
 
 - [AWS CLI](https://aws.amazon.com/cli/)
 - [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 - [Node.js 22.x](https://nodejs.org/en/)
 - [Docker](https://www.docker.com/products/docker-desktop)
 
-## セットアップと展開
+## Setup and Deployment
 
-### ローカル開発環境のセットアップ
+### Setting up the Local Development Environment
 
 ```bash
-# リポジトリをClone。Gitサブモジュールを含むため、`--recursive`の指定が必要
+# Clone the repository. The `--recursive` flag is required as it includes Git submodules
 git clone --recursive https://github.com/moritalous/mcp-streamablehttp-lambda-sample.git
-# プロジェクトディレクトリに移動
+# Navigate to the project directory
 cd mcp-streamablehttp-lambda-sample
 
-# 依存関係のインストール
+# Install dependencies
 cd mcp-function
 npm install
 npm run setup
 cd ..
 ```
 
-### ビルドとデプロイ
+### Build and Deploy
 
 ```bash
-# アプリケーションのビルド
+# Build the application
 sam build
 
-# アプリケーションのデプロイ（初回は対話形式）
+# Deploy the application (interactive for the first time)
 sam deploy --guided
 ```
 
-デプロイ時に以下の情報を入力します：
+During deployment, you will be prompted to enter the following information:
 
-- **Stack Name**: CloudFormationスタックの名前（例：mcp-server-streamable-http）
-- **AWS Region**: デプロイするリージョン
-- **Confirm changes before deploy**: 変更を確認するかどうか
-- **Allow SAM CLI IAM role creation**: IAMロールの作成を許可するかどうか
-- **Save arguments to samconfig.toml**: 設定を保存するかどうか
+- **Stack Name**: Name of the CloudFormation stack (e.g., mcp-server-streamable-http)
+- **AWS Region**: Region to deploy to
+- **Confirm changes before deploy**: Whether to confirm changes
+- **Allow SAM CLI IAM role creation**: Whether to allow IAM role creation
+- **Save arguments to samconfig.toml**: Whether to save the configuration
 
-デプロイが完了すると、Lambda Function URLが出力されます。このURLを使用してAPIにアクセスできます。
+After deployment completes, the Lambda Function URL will be output. You can use this URL to access the API.
 
-## 機能とエンドポイント
+## Features and Endpoints
 
-このアプリケーションは以下のエンドポイントを提供します：
+This application provides the following endpoints:
 
-- **POST /mcp**: MCPリクエストの初期化と送信
-- **GET /mcp**: Server-Sent Events (SSE)ストリームの確立
-- **DELETE /mcp**: セッションの終了
+- **POST /mcp**: Initialize and send MCP requests
+- **GET /mcp**: Establish Server-Sent Events (SSE) stream
+- **DELETE /mcp**: End the session
 
-## 実装されているツール
+## Implemented Tools
 
-このサンプルアプリケーションには以下のツールが実装されています：
+This sample application implements the following tools:
 
-1. **echo**: 入力されたメッセージをそのまま返すツール
-   - パラメータ: `message` (文字列)
+1. **echo**: A tool that returns the input message as is
+   - Parameter: `message` (string)
 
-2. **add**: 2つの数値を足し算するツール
-   - パラメータ: `a` (数値), `b` (数値)
+2. **add**: A tool that adds two numbers
+   - Parameters: `a` (number), `b` (number)
 
-## クライアント実装
+## Client Implementation
 
-クライアント側の実装例は `mcp-function/src/client.ts` にあります。このクライアントは以下の機能を実行します：
+A client implementation example is available in `mcp-function/src/client.ts`. This client performs the following functions:
 
-1. サーバーへの接続
-2. 利用可能なツールの一覧取得
-3. echoツールの呼び出し
-4. addツールの呼び出し
-5. 接続の終了
+1. Connect to the server
+2. Get a list of available tools
+3. Call the echo tool
+4. Call the add tool
+5. End the connection
 
-## ローカルからLambdaへの接続テスト
+## Testing Connection from Local to Lambda
 
 ```bash
 cd mcp-function
@@ -114,16 +114,16 @@ cd mcp-function
 MCP_SERVER_URL=https://*****.lambda-url.us-east-1.on.aws/mcp npm run dev:client
 ```
 
-## リソースのクリーンアップ
+## Resource Cleanup
 
-不要になったリソースを削除するには：
+To remove resources when no longer needed:
 
 ```bash
 sam delete --stack-name <your-stack-name>
 ```
 
-## 詳細情報
+## Additional Information
 
-- [AWS SAM デベロッパーガイド](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
+- [AWS SAM Developer Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
 - [Lambda Response Streaming](https://docs.aws.amazon.com/lambda/latest/dg/configuration-response-streaming.html)
 - [Model Context Protocol](https://github.com/anthropics/model-context-protocol)
