@@ -13,12 +13,12 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// JSON ボディパーサーを追加
+// Add JSON body parser
 app.use(bodyParser.json());
 
 /**
- * 完全にステートレスなサーバーインスタンスを作成する関数
- * 各リクエストごとに新しいインスタンスを作成
+ * Function to create a completely stateless server instance
+ * Creates a new instance for each request
  */
 function createStatelessServer() {
   console.log('Creating new stateless server instance');
@@ -35,20 +35,20 @@ function createStatelessServer() {
     }
   );
 
-  // ツール一覧を取得するハンドラを設定
+  // Set handler for retrieving tool list
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    // エコーツールのスキーマ定義
+    // Echo tool schema definition
     const EchoSchema = z.object({
       message: z.string().describe('Message to echo'),
     });
 
-    // 足し算ツールのスキーマ定義
+    // Addition tool schema definition
     const AddSchema = z.object({
       a: z.number().describe('First number'),
       b: z.number().describe('Second number'),
     });
 
-    // JSONスキーマに変換
+    // Convert to JSON schema
     const echoJsonSchema = zodToJsonSchema(EchoSchema);
     const addJsonSchema = zodToJsonSchema(AddSchema);
 
@@ -79,7 +79,7 @@ function createStatelessServer() {
     return { tools };
   });
 
-  // ツール呼び出しハンドラを設定
+  // Set tool call handler
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
@@ -107,24 +107,24 @@ function createStatelessServer() {
     throw new Error(`Unknown tool: ${name}`);
   });
 
-  // 完全にステートレスなトランスポートを作成
+  // Create completely stateless transport
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: () => undefined,
-    enableJsonResponse: true // JSON応答を有効化（ストリーミングではなく）
+    enableJsonResponse: true // Enable JSON response (not streaming)
   });
 
-  // サーバーに接続
+  // Connect to server
   server.connect(transport);
 
   return { server, transport };
 }
 
-// POSTリクエスト処理（初期化とメッセージ送信用）
+// POST request handler (for initialization and message sending)
 app.post('/mcp', async (req, res) => {
   console.log('Received POST request');
 
   try {
-    // リクエストボディを確認
+    // Check request body
     const message = req.body;
     const isInitRequest = Array.isArray(message)
       ? message.some(msg => msg.method === 'initialize')
@@ -132,20 +132,20 @@ app.post('/mcp', async (req, res) => {
 
     console.log(`Is initialization request: ${isInitRequest}`);
 
-    // 新しいサーバーとトランスポートを作成
+    // Create new server and transport
     const { transport } = createStatelessServer();
 
-    // 初期化リクエストの場合、内部フラグを設定
+    // For initialization requests, set internal flag
     if (isInitRequest) {
-      // @ts-ignore - プライベートプロパティにアクセス
+      // @ts-ignore - accessing private property
       transport._initialized = false;
     } else {
-      // 初期化以外のリクエストの場合、既に初期化済みとして扱う
-      // @ts-ignore - プライベートプロパティにアクセス
+      // For non-initialization requests, treat as already initialized
+      // @ts-ignore - accessing private property
       transport._initialized = true;
     }
 
-    // リクエストを処理
+    // Process request
     await transport.handleRequest(req, res, req.body);
   } catch (error) {
     console.error('Error processing request:', error);
@@ -161,19 +161,19 @@ app.post('/mcp', async (req, res) => {
   }
 });
 
-// GETリクエスト処理（SSEストリーム確立用）
+// GET request handler (for establishing SSE stream)
 app.get('/mcp', async (req, res) => {
   console.log('Received GET request');
 
   try {
-    // 新しいサーバーとトランスポートを作成
+    // Create new server and transport
     const { transport } = createStatelessServer();
 
-    // GETリクエストは常に初期化済みとして扱う
-    // @ts-ignore - プライベートプロパティにアクセス
+    // GET requests are always treated as already initialized
+    // @ts-ignore - accessing private property
     transport._initialized = true;
 
-    // リクエストを処理
+    // Process request
     await transport.handleRequest(req, res, req.body);
   } catch (error) {
     console.error('Error processing request:', error);
@@ -189,19 +189,19 @@ app.get('/mcp', async (req, res) => {
   }
 });
 
-// DELETEリクエスト処理（セッション終了用）
+// DELETE request handler (for session termination)
 app.delete('/mcp', async (req, res) => {
   console.log('Received DELETE request');
 
   try {
-    // 新しいサーバーとトランスポートを作成
+    // Create new server and transport
     const { transport } = createStatelessServer();
 
-    // DELETEリクエストは常に初期化済みとして扱う
-    // @ts-ignore - プライベートプロパティにアクセス
+    // DELETE requests are always treated as already initialized
+    // @ts-ignore - accessing private property
     transport._initialized = true;
 
-    // リクエストを処理
+    // Process request
     await transport.handleRequest(req, res, req.body);
   } catch (error) {
     console.error('Error processing request:', error);
@@ -217,13 +217,13 @@ app.delete('/mcp', async (req, res) => {
   }
 });
 
-// クリーンアップ処理
+// Cleanup handler
 process.on('SIGINT', async () => {
   console.log('Shutting down...');
   process.exit(0);
 });
 
-// サーバー起動
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);

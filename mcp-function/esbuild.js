@@ -8,10 +8,10 @@ esbuild.build({
   platform: 'node',
   target: 'node22',
   outfile: 'output/bundle.js',
-  external: ['aws-sdk', '@aws-sdk/*'], // AWS SDKはLambda環境に既に存在するため除外
+  external: ['aws-sdk', '@aws-sdk/*'], // Exclude AWS SDK as it already exists in the Lambda environment
   metafile: true,
 }).then(result => {
-  // バンドルサイズの情報を出力
+  // Output bundle size information
   const outputSize = Object.entries(result.metafile.outputs).reduce((acc, [file, data]) => {
     return acc + data.bytes;
   }, 0);
