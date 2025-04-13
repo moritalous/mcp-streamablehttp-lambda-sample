@@ -19,7 +19,7 @@
 
 - **リポジトリ**: [github.com/anthropics/model-context-protocol](https://github.com/anthropics/model-context-protocol)
 - **ブランチ**: main
-- **コミットハッシュ**: 6e05e4a6218ea1b0617091397f2e31b5ab29d354 (2025-04-13)
+- **コミットハッシュ**: 56b042795729dcdbf12a2c7be47955fbeafc6bc5 (2025-04-13)
 
 > [!NOTE]
 > 未リリースのバージョンを使用しているため、将来的なAPIの変更によって互換性が失われる可能性があります。
@@ -46,8 +46,10 @@
 ### ローカル開発環境のセットアップ
 
 ```bash
+# リポジトリをClone。Gitサブモジュールを含むため、`--recursive`の指定が必要
+git clone --recursive https://github.com/moritalous/mcp-streamablehttp-lambda-sample.git
 # プロジェクトディレクトリに移動
-cd sam-app
+cd mcp-streamablehttp-lambda-sample
 
 # 依存関係のインストール
 cd mcp-function
@@ -68,7 +70,7 @@ sam deploy --guided
 
 デプロイ時に以下の情報を入力します：
 
-- **Stack Name**: CloudFormationスタックの名前（例：streamable-mcp）
+- **Stack Name**: CloudFormationスタックの名前（例：mcp-server-streamable-http）
 - **AWS Region**: デプロイするリージョン
 - **Confirm changes before deploy**: 変更を確認するかどうか
 - **Allow SAM CLI IAM role creation**: IAMロールの作成を許可するかどうか
@@ -104,13 +106,12 @@ sam deploy --guided
 4. addツールの呼び出し
 5. 接続の終了
 
-## ローカルでのテスト
-
-SAM CLIを使用してローカルでアプリケーションをテストできます：
+## ローカルからLambdaへの接続テスト
 
 ```bash
-# ローカルでLambda関数を起動
-sam local start-api
+cd mcp-function
+
+MCP_SERVER_URL=https://*****.lambda-url.us-east-1.on.aws/mcp npm run dev:client
 ```
 
 ## リソースのクリーンアップ
