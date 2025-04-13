@@ -1,5 +1,8 @@
 # Streamable MCP Lambda Function
 
+> [!CAUTION]
+> Lambdaへデプロイしても、期待した動作はしないです。検証結果として残します
+
 このプロジェクトは、AWS Lambda上でModel Context Protocol (MCP)を使用したStreamable HTTP APIを実装したサーバーレスアプリケーションです。
 
 ## プロジェクト概要
