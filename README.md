@@ -1,7 +1,7 @@
 # Streamable MCP Lambda Function
 
 > [!WARNING]
-> Lambdaへデプロイし、MCPのTypeScriptライブラリーから呼び出せることは確認しました。しかし、プライベートプロパティへアクセスしているなど、トリッキーな実装となっています。
+> Lambdaへデプロイし、MCPのTypeScriptライブラリーから呼び出せることは確認しました。しかし、プライベートプロパティへアクセスしているなど、トリッキーな実装となっています。また、期待した動作をしない場合があります。検証結果として残します。
 
 このプロジェクトは、AWS Lambda上でModel Context Protocol (MCP)を使用したStreamable HTTP APIを実装したサーバーレスアプリケーションです。
 
