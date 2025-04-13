@@ -1,5 +1,8 @@
 # Streamable MCP Lambda Function
 
+> [!WARNING]
+> Lambdaへデプロイし、MCPのTypeScriptライブラリーから呼び出せることは確認しました。しかし、プライベートプロパティへアクセスしているなど、トリッキーな実装となっています。
+
 このプロジェクトは、AWS Lambda上でModel Context Protocol (MCP)を使用したStreamable HTTP APIを実装したサーバーレスアプリケーションです。
 
 ## プロジェクト概要
@@ -9,6 +12,17 @@
 - Model Context Protocol (MCP)を使用したツール呼び出し機能
 - Lambda Response Streaming機能を活用したリアルタイムレスポンス
 - 簡単なエコーツールと計算ツールの実装例
+
+## 使用ライブラリについて
+
+このプロジェクトでは、Model Context Protocol (MCP) TypeScriptライブラリの未リリースバージョン（mainブランチ）を使用しています。
+
+- **リポジトリ**: [github.com/anthropics/model-context-protocol](https://github.com/anthropics/model-context-protocol)
+- **ブランチ**: main
+- **コミットハッシュ**: 6e05e4a6218ea1b0617091397f2e31b5ab29d354 (2025-04-13)
+
+> [!NOTE]
+> 未リリースのバージョンを使用しているため、将来的なAPIの変更によって互換性が失われる可能性があります。
 
 ## アーキテクチャ
 

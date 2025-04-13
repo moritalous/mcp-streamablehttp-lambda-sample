@@ -16,14 +16,13 @@ const PORT = process.env.PORT || 3001;
 // JSON ボディパーサーを追加
 app.use(bodyParser.json());
 
-// サーバーの初期化状態を追跡
-let isServerInitialized = false;
-let currentTransport: StreamableHTTPServerTransport | null = null;
-
 /**
- * サーバーインスタンスを作成する関数
+ * 完全にステートレスなサーバーインスタンスを作成する関数
+ * 各リクエストごとに新しいインスタンスを作成
  */
-function createServer() {
+function createStatelessServer() {
+  console.log('Creating new stateless server instance');
+
   const server = new Server(
     {
       name: 'mcp-streamablehttp-sample-server',
@@ -108,12 +107,16 @@ function createServer() {
     throw new Error(`Unknown tool: ${name}`);
   });
 
-  return {
-    server,
-    cleanup: async () => {
-      console.log('Cleaning up server resources...');
-    },
-  };
+  // 完全にステートレスなトランスポートを作成
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: () => undefined,
+    enableJsonResponse: true // JSON応答を有効化（ストリーミングではなく）
+  });
+
+  // サーバーに接続
+  server.connect(transport);
+
+  return { server, transport };
 }
 
 // POSTリクエスト処理（初期化とメッセージ送信用）
@@ -121,49 +124,29 @@ app.post('/mcp', async (req, res) => {
   console.log('Received POST request');
 
   try {
-    // req.bodyを使用（bodyParserによって解析済み）
+    // リクエストボディを確認
     const message = req.body;
     const isInitRequest = Array.isArray(message)
       ? message.some(msg => msg.method === 'initialize')
       : message.method === 'initialize';
 
-    // 初期化リクエストの場合、または初期化されていない場合は新しいサーバーとトランスポートを作成
-    if (isInitRequest || !isServerInitialized) {
-      console.log('Creating new server instance');
-      const { server, cleanup } = createServer();
+    console.log(`Is initialization request: ${isInitRequest}`);
 
-      // 新しいトランスポートを作成
-      currentTransport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: () => {
-          return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        }
-      });
+    // 新しいサーバーとトランスポートを作成
+    const { transport } = createStatelessServer();
 
-      // サーバーに接続
-      await server.connect(currentTransport);
-      isServerInitialized = true;
-
-      // クリーンアップ処理の設定
-      server.onclose = async () => {
-        await cleanup();
-        isServerInitialized = false;
-        currentTransport = null;
-      };
+    // 初期化リクエストの場合、内部フラグを設定
+    if (isInitRequest) {
+      // @ts-ignore - プライベートプロパティにアクセス
+      transport._initialized = false;
+    } else {
+      // 初期化以外のリクエストの場合、既に初期化済みとして扱う
+      // @ts-ignore - プライベートプロパティにアクセス
+      transport._initialized = true;
     }
 
     // リクエストを処理
-    if (currentTransport) {
-      await currentTransport.handleRequest(req, res, req.body);
-    } else {
-      res.status(500).json({
-        jsonrpc: '2.0',
-        error: {
-          code: -32000,
-          message: 'Server transport not initialized'
-        },
-        id: null
-      });
-    }
+    await transport.handleRequest(req, res, req.body);
   } catch (error) {
     console.error('Error processing request:', error);
     res.status(400).json({
@@ -181,14 +164,25 @@ app.post('/mcp', async (req, res) => {
 // GETリクエスト処理（SSEストリーム確立用）
 app.get('/mcp', async (req, res) => {
   console.log('Received GET request');
-  if (currentTransport) {
-    await currentTransport.handleRequest(req, res);
-  } else {
-    res.status(500).json({
+
+  try {
+    // 新しいサーバーとトランスポートを作成
+    const { transport } = createStatelessServer();
+
+    // GETリクエストは常に初期化済みとして扱う
+    // @ts-ignore - プライベートプロパティにアクセス
+    transport._initialized = true;
+
+    // リクエストを処理
+    await transport.handleRequest(req, res, req.body);
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(400).json({
       jsonrpc: '2.0',
       error: {
-        code: -32000,
-        message: 'Server transport not initialized'
+        code: -32700,
+        message: 'Parse error',
+        data: String(error)
       },
       id: null
     });
@@ -198,14 +192,25 @@ app.get('/mcp', async (req, res) => {
 // DELETEリクエスト処理（セッション終了用）
 app.delete('/mcp', async (req, res) => {
   console.log('Received DELETE request');
-  if (currentTransport) {
-    await currentTransport.handleRequest(req, res);
-  } else {
-    res.status(500).json({
+
+  try {
+    // 新しいサーバーとトランスポートを作成
+    const { transport } = createStatelessServer();
+
+    // DELETEリクエストは常に初期化済みとして扱う
+    // @ts-ignore - プライベートプロパティにアクセス
+    transport._initialized = true;
+
+    // リクエストを処理
+    await transport.handleRequest(req, res, req.body);
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(400).json({
       jsonrpc: '2.0',
       error: {
-        code: -32000,
-        message: 'Server transport not initialized'
+        code: -32700,
+        message: 'Parse error',
+        data: String(error)
       },
       id: null
     });
