@@ -1,0 +1,3 @@
+[submodule "mcp-function/typescript-sdk"]
+	path = mcp-function/typescript-sdk
+	url = https://github.com/modelcontextprotocol/typescript-sdk.git

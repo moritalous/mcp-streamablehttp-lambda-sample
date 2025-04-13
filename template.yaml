@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+
+  Sample SAM Template for sam-app with MCP Streamable HTTP Lambda
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+
+Resources:
+  MCPStreamableFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: mcp-function/
+      Handler: run.sh
+      Runtime: nodejs22.x
+      MemorySize: 1024
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
+          AWS_LWA_INVOKE_MODE: response_stream
+          RUST_LOG: info
+          PORT: 8080
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerX86:24
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: RESPONSE_STREAM
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  MCPStreamableFunctionUrl:
+    Description: "Function URL for MCP Streamable HTTP function"
+    Value: !GetAtt MCPStreamableFunctionUrl.FunctionUrl
+  MCPStreamableFunction:
+    Description: "MCP Streamable HTTP Lambda Function ARN"
+    Value: !GetAtt MCPStreamableFunction.Arn

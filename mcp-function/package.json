@@ -1,0 +1,37 @@
+{
+  "name": "mcp-streamablehttp-lambda",
+  "version": "1.0.0",
+  "description": "Sample implementation of MCP Streamable HTTP protocol",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start:server": "node dist/server.js",
+    "start:client": "node dist/client.js",
+    "dev:server": "ts-node src/server.ts",
+    "dev:client": "ts-node src/client.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "cd typescript-sdk && npm install && npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "streamable-http",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "file:typescript-sdk",
+    "body-parser": "^2.2.0",
+    "esbuild": "^0.25.2",
+    "express": "^5.1.0",
+    "zod": "^3.22.4",
+    "zod-to-json-schema": "^3.22.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.11.30",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
