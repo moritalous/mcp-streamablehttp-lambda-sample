@@ -11,7 +11,7 @@
     "dev:server": "ts-node src/server.ts",
     "dev:client": "ts-node src/client.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "setup": "cd typescript-sdk && npm install && npm run build"
+    "setup": "cd typescript-sdk && npm ci && npm run build"
   },
   "keywords": [
     "mcp",
