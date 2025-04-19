@@ -1,8 +1,5 @@
 # Streamable MCP Lambda Function
 
-> [!WARNING]
-> While we have confirmed that this can be deployed to Lambda and called from the MCP TypeScript library, the implementation is tricky, including accessing private properties, and may not always work as expected. This remains as a proof of concept.
-
 This project is a serverless application that implements a Streamable HTTP API using the Model Context Protocol (MCP) on AWS Lambda.
 
 ## Project Overview
@@ -11,18 +8,13 @@ This application deploys a Lambda function that supports response streaming usin
 
 - Tool invocation functionality using the Model Context Protocol (MCP)
 - Real-time responses utilizing Lambda Response Streaming
-- Implementation examples of simple echo and calculation tools
+- Implementation examples of simple greeting tools and notification capabilities
 
 ## About the Libraries Used
 
-This project uses an unreleased version (main branch) of the Model Context Protocol (MCP) TypeScript library.
+This project uses the Model Context Protocol (MCP) TypeScript library.
 
 - **Repository**: [github.com/anthropics/model-context-protocol](https://github.com/anthropics/model-context-protocol)
-- **Branch**: main
-- **Commit Hash**: 56b042795729dcdbf12a2c7be47955fbeafc6bc5 (2025-04-13)
-
-> [!NOTE]
-> Since we are using an unreleased version, compatibility may be lost due to future API changes.
 
 ## Architecture
 
@@ -46,15 +38,14 @@ To use this project, you need:
 ### Setting up the Local Development Environment
 
 ```bash
-# Clone the repository. The `--recursive` flag is required as it includes Git submodules
-git clone --recursive https://github.com/moritalous/mcp-streamablehttp-lambda-sample.git
+# Clone the repository
+git clone https://github.com/moritalous/mcp-streamablehttp-lambda-sample.git
 # Navigate to the project directory
 cd mcp-streamablehttp-lambda-sample
 
 # Install dependencies
 cd mcp-function
 npm install
-npm run setup
 cd ..
 ```
 
@@ -83,28 +74,34 @@ After deployment completes, the Lambda Function URL will be output. You can use 
 This application provides the following endpoints:
 
 - **POST /mcp**: Initialize and send MCP requests
-- **GET /mcp**: Establish Server-Sent Events (SSE) stream
-- **DELETE /mcp**: End the session
+- **GET /mcp**: Method not allowed (returns 405)
+- **DELETE /mcp**: Method not allowed (returns 405)
 
 ## Implemented Tools
 
 This sample application implements the following tools:
 
-1. **echo**: A tool that returns the input message as is
-   - Parameter: `message` (string)
+1. **greet**: A simple greeting tool
+   - Parameter: `name` (string)
 
-2. **add**: A tool that adds two numbers
-   - Parameters: `a` (number), `b` (number)
+2. **multi-greet**: A tool that sends multiple greetings with notifications
+   - Parameter: `name` (string)
+
+3. **greeting-template**: A prompt template for generating greetings
+   - Parameter: `name` (string)
+
+4. **greeting-resource**: A resource that provides a default greeting
 
 ## Client Implementation
 
-A client implementation example is available in `mcp-function/src/client.ts`. This client performs the following functions:
+A client implementation example is available in `mcp-function/src/client.ts`. This client provides an interactive command-line interface to:
 
 1. Connect to the server
-2. Get a list of available tools
-3. Call the echo tool
-4. Call the add tool
-5. End the connection
+2. List available tools, prompts, and resources
+3. Call tools with arguments
+4. Get prompts with arguments
+5. Handle notifications from the server
+6. Manage session termination and reconnection
 
 ## Testing Connection from Local to Lambda
 

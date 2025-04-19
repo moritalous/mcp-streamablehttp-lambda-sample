@@ -1,8 +1,5 @@
 # Streamable MCP Lambda Function
 
-> [!WARNING]
-> Lambdaへデプロイし、MCPのTypeScriptライブラリーから呼び出せることは確認しました。しかし、プライベートプロパティへアクセスしているなど、トリッキーな実装となっています。また、期待した動作をしない場合があります。検証結果として残します。
-
 このプロジェクトは、AWS Lambda上でModel Context Protocol (MCP)を使用したStreamable HTTP APIを実装したサーバーレスアプリケーションです。
 
 ## プロジェクト概要
@@ -11,18 +8,13 @@
 
 - Model Context Protocol (MCP)を使用したツール呼び出し機能
 - Lambda Response Streaming機能を活用したリアルタイムレスポンス
-- 簡単なエコーツールと計算ツールの実装例
+- 簡単な挨拶ツールと通知機能の実装例
 
 ## 使用ライブラリについて
 
-このプロジェクトでは、Model Context Protocol (MCP) TypeScriptライブラリの未リリースバージョン（mainブランチ）を使用しています。
+このプロジェクトはModel Context Protocol (MCP) TypeScriptライブラリを使用しています。
 
 - **リポジトリ**: [github.com/anthropics/model-context-protocol](https://github.com/anthropics/model-context-protocol)
-- **ブランチ**: main
-- **コミットハッシュ**: 56b042795729dcdbf12a2c7be47955fbeafc6bc5 (2025-04-13)
-
-> [!NOTE]
-> 未リリースのバージョンを使用しているため、将来的なAPIの変更によって互換性が失われる可能性があります。
 
 ## アーキテクチャ
 
@@ -46,15 +38,14 @@
 ### ローカル開発環境のセットアップ
 
 ```bash
-# リポジトリをClone。Gitサブモジュールを含むため、`--recursive`の指定が必要
-git clone --recursive https://github.com/moritalous/mcp-streamablehttp-lambda-sample.git
+# リポジトリをClone
+git clone https://github.com/moritalous/mcp-streamablehttp-lambda-sample.git
 # プロジェクトディレクトリに移動
 cd mcp-streamablehttp-lambda-sample
 
 # 依存関係のインストール
 cd mcp-function
 npm install
-npm run setup
 cd ..
 ```
 
@@ -83,28 +74,34 @@ sam deploy --guided
 このアプリケーションは以下のエンドポイントを提供します：
 
 - **POST /mcp**: MCPリクエストの初期化と送信
-- **GET /mcp**: Server-Sent Events (SSE)ストリームの確立
-- **DELETE /mcp**: セッションの終了
+- **GET /mcp**: 許可されていないメソッド（405を返す）
+- **DELETE /mcp**: 許可されていないメソッド（405を返す）
 
 ## 実装されているツール
 
 このサンプルアプリケーションには以下のツールが実装されています：
 
-1. **echo**: 入力されたメッセージをそのまま返すツール
-   - パラメータ: `message` (文字列)
+1. **greet**: シンプルな挨拶ツール
+   - パラメータ: `name` (文字列)
 
-2. **add**: 2つの数値を足し算するツール
-   - パラメータ: `a` (数値), `b` (数値)
+2. **multi-greet**: 通知機能付きで複数の挨拶を送信するツール
+   - パラメータ: `name` (文字列)
+
+3. **greeting-template**: 挨拶を生成するためのプロンプトテンプレート
+   - パラメータ: `name` (文字列)
+
+4. **greeting-resource**: デフォルトの挨拶を提供するリソース
 
 ## クライアント実装
 
-クライアント側の実装例は `mcp-function/src/client.ts` にあります。このクライアントは以下の機能を実行します：
+クライアント側の実装例は `mcp-function/src/client.ts` にあります。このクライアントは以下の機能を提供する対話型コマンドラインインターフェースを提供します：
 
 1. サーバーへの接続
-2. 利用可能なツールの一覧取得
-3. echoツールの呼び出し
-4. addツールの呼び出し
-5. 接続の終了
+2. 利用可能なツール、プロンプト、リソースの一覧取得
+3. 引数を指定したツールの呼び出し
+4. 引数を指定したプロンプトの取得
+5. サーバーからの通知の処理
+6. セッション終了と再接続の管理
 
 ## ローカルからLambdaへの接続テスト
 
