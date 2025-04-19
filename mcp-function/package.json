@@ -10,8 +10,7 @@
     "start:client": "node dist/client.js",
     "dev:server": "ts-node src/server.ts",
     "dev:client": "ts-node src/client.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "setup": "cd typescript-sdk && npm ci && npm run build"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "mcp",
@@ -21,7 +20,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "file:typescript-sdk",
+    "@modelcontextprotocol/sdk": "^1.10.1",
     "body-parser": "^2.2.0",
     "esbuild": "^0.25.2",
     "express": "^5.1.0",
